@@ -45,7 +45,7 @@ class ModelArguments:
 
 @dataclass
 class TrainingArguments(transformers.TrainingArguments):
-    cache_dir: Optional[str] = field(default=None)
+    cache_dir: Optional[str] = field(default="data/.cache")
     optim: str = field(default="adamw_torch")
     model_max_length: int = field(
         default=8192 * 4,
@@ -97,9 +97,10 @@ def tokenize_fn(tokenizer, example):
     )
     return {"input_ids": outputs["input_ids"].view(-1, context_length)}
 
-def train():
+
+def train(args: list[str] = None):
     parser = transformers.HfArgumentParser((ModelArguments, TrainingArguments))
-    model_args, training_args = parser.parse_args_into_dataclasses()
+    model_args, training_args = parser.parse_args_into_dataclasses(args)
 
     # NOTE: May expand supported model types in the future
     if model_args.model_type == "gpt-neox":

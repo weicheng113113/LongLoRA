@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "longlora"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.11.5"
+numpy = "1.26.1"
+torch = "2.0.0"
+rouge-score = "0.1.2"
+datasets = "2.14.5"
+einops = "0.7.0"
+peft = "0.5.0"
+flash-attn = "2.2.1"
+
+[tool.poetry.group.dev.dependencies]
+numpy = "1.26.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
