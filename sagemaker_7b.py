@@ -11,8 +11,8 @@ def main():
         # "--model_name_or_path", "/media/cwei/WD_BLACK/model_weights/llama2/llama-2-7b/",
         # "--cache_dir", "path_to_cache/",
         "--model_name_or_path", "meta-llama/Llama-2-7b-hf",
-        "--output_dir", "/media/cwei/WD_BLACK/model_weights/longlora-llama-2-7b-hf",
-        "--cache_dir", "/media/cwei/WD_BLACK/model_weights/llama-2-7b-hf",
+        "--output_dir", "/data/download/",
+        "--cache_dir", "/data/.cache/",
         "--model_max_length", "8192",
         "--use_flash_attn", "True",
         "--low_rank_training", "False",
@@ -31,10 +31,8 @@ def main():
         "--logging_steps", "1",
         "--deepspeed", "ds_configs/stage2.json",
         "--max_steps", "1000",
-        # "--tf32", "True",
-        # "--bf16", "True",
-        "--tf32", "False",
-        "--fp16", "True",
+        "--tf32", "True",
+        "--bf16", "True",
     ])
     huggingface_hub.login("xx")
     train(args)
