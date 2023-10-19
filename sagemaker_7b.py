@@ -11,8 +11,8 @@ def main():
         # "--model_name_or_path", "/media/cwei/WD_BLACK/model_weights/llama2/llama-2-7b/",
         # "--cache_dir", "path_to_cache/",
         "--model_name_or_path", "meta-llama/Llama-2-7b-hf",
-        "--output_dir", "/data/download/",
-        "--cache_dir", "/data/.cache/",
+        "--output_dir", "./data/download/",
+        "--cache_dir", "./data/.cache/",
         "--model_max_length", "8192",
         "--use_flash_attn", "True",
         "--low_rank_training", "False",
@@ -33,6 +33,7 @@ def main():
         "--max_steps", "1000",
         "--tf32", "True",
         "--bf16", "True",
+        "--dataset_num_workers", "16",
     ])
     huggingface_hub.login("xx")
     train(args)

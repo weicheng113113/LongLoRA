@@ -35,6 +35,7 @@ def main():
         # "--bf16", "True",
         "--tf32", "False",
         "--fp16", "True",
+        "--dataset_num_workers", "4",
     ])
     huggingface_hub.login("xx")
     train(args)

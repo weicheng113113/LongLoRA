@@ -63,6 +63,10 @@ class TrainingArguments(transformers.TrainingArguments):
         default="embed,norm",
         metadata={"help": "Additional trainable parameters except LoRA weights, if low rank training."},
     )
+    dataset_num_workers: int = field(
+        default=4,
+        metadata={"help": "Number of workers for dataset loading."},
+    )
 
 def smart_tokenizer_and_embedding_resize(
     special_tokens_dict: Dict,
@@ -156,7 +160,11 @@ def train(args: list[str] = None):
     if rank > 0:
         barrier()
     dataset = load_dataset("togethercomputer/RedPajama-Data-1T-Sample", cache_dir=training_args.cache_dir)
-    dataset = dataset.map(partial(tokenize_fn,tokenizer),batched=True, num_proc=32, remove_columns=["text", "meta"])
+    dataset = dataset.map(
+        partial(tokenize_fn, tokenizer),
+        batched=True,
+        num_proc=training_args.dataset_num_workers,
+        remove_columns=["text", "meta"])
     # dataset = dataset.map(partial(tokenize_fn,tokenizer),batched=True, num_proc=128, remove_columns=["text", "meta"])
 
     if rank == 0:
