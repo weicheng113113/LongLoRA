@@ -6,6 +6,7 @@ from fine_tune import train
 
 
 def main():
+    os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:128"
     args = []
     args.extend([
         # "--model_name_or_path", "/media/cwei/WD_BLACK/model_weights/llama2/llama-2-7b/",
