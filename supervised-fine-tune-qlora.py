@@ -1,5 +1,5 @@
 # Written by Yukang Chen
-# Some code based on https://github.com/epfml/landmark-attention
+# Some code based on https://github.com/huggingface/peft/blob/main/examples/fp4_finetuning/finetune_fp4_opt_bnb_peft.py
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,9 +23,10 @@ from dataclasses import dataclass, field
 from typing import Dict, Optional, Sequence
 
 import torch
+import torch.nn as nn
 import transformers
 from torch.utils.data import Dataset
-from transformers import Trainer, DataCollatorForLanguageModeling
+from transformers import Trainer, DataCollatorForLanguageModeling, BitsAndBytesConfig
 from llama_attn_replace_sft import replace_llama_attn
 from gptneox_attn_replace import replace_gpt_neox_attn
 from peft import LoraConfig, get_peft_model
@@ -217,9 +218,9 @@ def make_supervised_data_module(tokenizer: transformers.PreTrainedTokenizer, dat
     return dict(train_dataset=train_dataset, eval_dataset=None, data_collator=data_collator)
 
 
-def train(args: list[str] = None):
+def train():
     parser = transformers.HfArgumentParser((ModelArguments, DataArguments, TrainingArguments))
-    model_args, data_args, training_args = parser.parse_args_into_dataclasses(args)
+    model_args, data_args, training_args = parser.parse_args_into_dataclasses()
 
     # NOTE: May expand supported model types in the future
     if model_args.model_type == "gpt-neox":
@@ -244,7 +245,21 @@ def train(args: list[str] = None):
         config=config,
         cache_dir=training_args.cache_dir,
         torch_dtype=torch.bfloat16,
+        quantization_config=BitsAndBytesConfig(
+            load_in_4bit=True,
+            llm_int8_threshold=6.0,
+            llm_int8_has_fp16_weight=False,
+            bnb_4bit_compute_dtype=torch.bfloat16,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4",
+        ),
     )
+
+    for param in model.parameters():
+        param.requires_grad = False  # freeze the model - train adapters later
+        if param.ndim == 1:
+            # cast the small parameters (e.g. layernorm) to fp32 for stability
+            param.data = param.data.to(torch.float32)
 
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         model_args.model_name_or_path,
@@ -290,6 +305,25 @@ def train(args: list[str] = None):
         model = get_peft_model(model, config)
         # enable trainable params
         [p.requires_grad_() for n, p in model.named_parameters() if any([k in n for k in training_args.trainable_params.split(",")])]
+
+    class CastOutputToFloat(nn.Sequential):
+        def forward(self, x):
+            return super().forward(x).to(torch.float32)
+
+    model.lm_head = CastOutputToFloat(model.lm_head)
+
+    # Verifying the datatypes.
+    dtypes = {}
+    for _, p in model.named_parameters():
+        dtype = p.dtype
+        if dtype not in dtypes:
+            dtypes[dtype] = 0
+        dtypes[dtype] += p.numel()
+    total = 0
+    for k, v in dtypes.items():
+        total += v
+    for k, v in dtypes.items():
+        print(k, v, v / total)
 
     model.config.use_cache = False         # required for gradient checkpointing
     model.enable_input_require_grads()     # required for gradient checkpointing
