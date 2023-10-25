@@ -12,7 +12,7 @@ def main():
         "--output_dir", "/media/cwei/WD_BLACK/model_weights/longlora-llama-2-7b-chat-hf",
         "--cache_dir", "/media/cwei/WD_BLACK/model_weights/llama-2-7b-chat-hf",
         "--model_max_length", "32768",
-        # "--use_flash_attn", "True",
+        "--use_flash_attn", "True",
         "--data_path", "LongAlpaca-12k.json",
         "--low_rank_training", "True",
         "--num_train_epochs", "3",
@@ -39,5 +39,4 @@ def main():
 
 
 if __name__ == "__main__":
-    os.environ["CUDA_VISIBLE_DEVICES"] = ""  # disable GPU
     main()
