@@ -117,7 +117,7 @@ def main(args):
     if torch.cuda.is_available():
         print("Using GPU")
         device = "cuda:0"
-        torch_dtype = torch.float16,
+        torch_dtype = torch.float16
         torch.cuda.set_device(device)
 
     seed = 2
