@@ -218,9 +218,9 @@ def make_supervised_data_module(tokenizer: transformers.PreTrainedTokenizer, dat
     return dict(train_dataset=train_dataset, eval_dataset=None, data_collator=data_collator)
 
 
-def train():
+def train(args: list[str] = None):
     parser = transformers.HfArgumentParser((ModelArguments, DataArguments, TrainingArguments))
-    model_args, data_args, training_args = parser.parse_args_into_dataclasses()
+    model_args, data_args, training_args = parser.parse_args_into_dataclasses(args)
 
     # NOTE: May expand supported model types in the future
     if model_args.model_type == "gpt-neox":

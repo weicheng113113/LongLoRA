@@ -1,8 +1,6 @@
-import os
-
 import huggingface_hub
 
-from supervised_fine_tune import train
+from supervised_fine_tune_qlora import train
 
 
 def main():
