@@ -17,7 +17,7 @@ def run_eval():
         "--cache_dir", "./data/.cache",
         # "--flash_attn", "False",
     ])
-    huggingface_hub.login("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")
+    huggingface_hub.login("xx")
 
     main(parse_config(args))
 
