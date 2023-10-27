@@ -24,7 +24,7 @@ import transformers
 from peft import PeftModel
 from llama_attn_replace import replace_llama_attn
 
-def parse_config():
+def parse_config(cmd_args: list[str] = None):
     parser = argparse.ArgumentParser(description='arg parser')
     parser.add_argument('--batch_size', type=int, default=32, help='batch size during inference')
     parser.add_argument('--base_model', type=str, default="/data1/pretrained-models/llama-7b-hf")
@@ -32,9 +32,10 @@ def parse_config():
     parser.add_argument('--seq_len', type=int, default=2048, help='context length during evaluation')
     parser.add_argument('--context_size', type=int, default=-1, help='context size during fine-tuning')
     parser.add_argument('--peft_model', type=str, default=None, help='')
-    parser.add_argument('--flash_attn', type=bool, default=True, help='')
+    # parser.add_argument('--flash_attn', type=bool, default=True, help='')
+    parser.add_argument('--flash_attn', type=bool, default=False, help='')
     parser.add_argument('--data_path', type=str, default="./test.bin", help='')
-    args = parser.parse_args()
+    args = parser.parse_args(cmd_args)
     return args
 
 def get_as_batch(data, seq_length, batch_size, device='cpu', sliding_window=256):
@@ -111,11 +112,15 @@ def evaluate(model, data, batch_size, device, seq_length, sliding_window=256, us
     return stats
 
 def main(args):
+    device = "cpu"
+    torch_dtype = torch.float
+    if torch.cuda.is_available():
+        print("Using GPU")
+        device = "cuda:0"
+        torch_dtype = torch.float16,
+        torch.cuda.set_device(device)
 
-    device = "cuda:0"
     seed = 2
-    torch.cuda.set_device(device)
-
     torch.manual_seed(seed)
     random.seed(seed)
     np.random.seed(seed)
@@ -147,7 +152,7 @@ def main(args):
         args.base_model,
         config=config,
         cache_dir=args.cache_dir,
-        torch_dtype=torch.float16,
+        torch_dtype=torch_dtype,
         device_map="auto",
     )
     model.resize_token_embeddings(32001)
@@ -160,7 +165,8 @@ def main(args):
             model,
             args.peft_model,
             device_map="auto",
-            torch_dtype=torch.float16,
+            torch_dtype=torch_dtype,
+            offload_folder=args.cache_dir,
         )
 
     stats = evaluate(model, data, args.batch_size, device, args.seq_len, sliding_window=256)

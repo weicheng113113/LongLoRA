@@ -61,4 +61,5 @@ exec bash - switch to bash
 exec zsh - Switch to zsh
 
 ### training
+torchrun --nproc_per_node=auto sagemaker_7b_supervised_fine_tune.py
 torchrun --nproc_per_node=auto sagemaker_7b_fine_tune.py
