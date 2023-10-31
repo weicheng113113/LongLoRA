@@ -23,5 +23,5 @@ def run_eval():
 
 
 if __name__ == "__main__":
-    os.environ["CUDA_VISIBLE_DEVICES"] = ""  # disable GPU
+    # os.environ["CUDA_VISIBLE_DEVICES"] = ""  # disable GPU
     run_eval()

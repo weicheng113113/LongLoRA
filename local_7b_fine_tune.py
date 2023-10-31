@@ -37,6 +37,7 @@ def main():
         # "--fp16", "True",
         "--dataset_num_workers", "4",
         "--use_flash_attn", "False"
+        # "--use_flash_attn", "True"
     ])
     huggingface_hub.login("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")
     train(args)

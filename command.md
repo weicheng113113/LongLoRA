@@ -32,6 +32,7 @@ PIP_NO_BUILD_ISOLATION=1 pip install -e .
 
 ### poetry commands
 
+poetry init
 poetry show
 poetry add torch=2.0.0
 poetry lock --no-update
@@ -63,3 +64,11 @@ exec zsh - Switch to zsh
 ### training
 torchrun --nproc_per_node=auto sagemaker_7b_supervised_fine_tune.py
 torchrun --nproc_per_node=auto sagemaker_7b_fine_tune.py
+torchrun --nproc_per_node=auto sagemaker_7b_supervised_fine_tune_qlora.py
+
+### inference
+python merge_lora_weights_and_save_hf_model.py \
+--base_model meta-llama/Llama-2-7b-chat-hf \
+--peft_model ./data/download \
+--context_size 32768 \
+--save_path ./output/Llama-2-7b-supervised-qlora-32k-merged

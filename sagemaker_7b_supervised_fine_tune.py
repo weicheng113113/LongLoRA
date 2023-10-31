@@ -9,7 +9,7 @@ def main():
     args = []
     args.extend([
         "--model_name_or_path", "meta-llama/Llama-2-7b-chat-hf",
-        "--output_dir", "./data/download/",
+        "--output_dir", "./output/7b_supervised_32k",
         "--cache_dir", "./data/.cache/",
         "--model_max_length", "32768",
         "--use_flash_attn", "True",
