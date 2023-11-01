@@ -72,3 +72,11 @@ python merge_lora_weights_and_save_hf_model.py \
 --peft_model ./data/download \
 --context_size 32768 \
 --save_path ./output/Llama-2-7b-supervised-qlora-32k-merged
+
+python inference.py  \
+--base_model ./output/Llama-2-7b-supervised-qlora-32k-merged \
+--question "What are the main contributions and novelties of this work?" \
+--context_size 32768 \
+--max_gen_len 512 \
+--flash_attn True \
+--material "materials/2309.12307.txt"
