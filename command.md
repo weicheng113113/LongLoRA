@@ -63,6 +63,23 @@ tmux
 exec bash - switch to bash
 exec zsh - Switch to zsh
 
+apt install pax-utils
+lddtree /usr/bin/curl
+
+apt-get install mlocate
+locate libcurl.so.4
+unlink /opt/conda/lib/libcurl.so.4
+ln -s /usr/lib/x86_64-linux-gnu/libcurl.so.4.6.0 /opt/conda/lib/libcurl.so.4
+
+No module named '_bz2'
+No module named '_curses'
+No module named '_ctypes'
+No module named 'readline'
+No module named '_sqlite3'
+No module named '_lzma'
+
+apt-get install libncurses-dev libbz2-dev libffi-dev libreadline-dev libsqlite3-dev liblzma-dev
+
 ### training
 torchrun --nproc_per_node=auto sagemaker_7b_supervised_fine_tune.py
 torchrun --nproc_per_node=auto sagemaker_7b_fine_tune.py

@@ -1,9 +1,11 @@
 import os
 
+import torch
 from datasets import load_dataset
 from fine_tune import tokenize_fn, DEFAULT_PAD_TOKEN, DEFAULT_BOS_TOKEN, DEFAULT_EOS_TOKEN, DEFAULT_UNK_TOKEN
 import transformers
 from functools import partial
+import multiprocess.context as ctx
 
 
 def prepare(model_name_or_path: str, cache_dir: str, model_max_length: int, num_proc: int):
@@ -30,7 +32,9 @@ def prepare(model_name_or_path: str, cache_dir: str, model_max_length: int, num_
     dataset = dataset.map(
         partial(tokenize_fn, tokenizer),
         batched=True,
+        batch_size=1000,
         num_proc=num_proc,
+        writer_batch_size=1000,
         remove_columns=["text", "meta"])
 
     print(dataset)
@@ -41,9 +45,11 @@ def main():
         model_name_or_path="meta-llama/Llama-2-7b-hf",
         cache_dir="./data/.cache",
         model_max_length=8192,
-        num_proc=4)
+        num_proc=16)
 
 
 if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = ""  # disable GPU
+    ctx._force_start_method('spawn')
+    # torch.set_num_threads(1)
     main()
