@@ -8,6 +8,7 @@ pyenv install 3.11.6
 
 ### manage multiple pythons
 
+pyenv shell 3.10.10
 pyenv shell 3.11.6
 
 pyenv versions
@@ -38,6 +39,7 @@ poetry add torch=2.0.0
 poetry lock --no-update
 poetry install --sync
 poetry env use 3.11.6
+poetry env use 3.10.8
 
 
 ### CUDA

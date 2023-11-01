@@ -1213,7 +1213,7 @@ files = [
 ]
 
 [package.dependencies]
-numpy = {version = ">=1.23.2", markers = "python_version == \"3.11\""}
+numpy = {version = ">=1.22.4", markers = "python_version < \"3.11\""}
 python-dateutil = ">=2.8.2"
 pytz = ">=2020.1"
 tzdata = ">=2022.1"
@@ -2390,5 +2390,5 @@ multidict = ">=4.0"
 
 [metadata]
 lock-version = "2.0"
-python-versions = "3.11.6"
-content-hash = "5112468592fb3703208ea0284cc4569c1c117d67cd00f2334032db96c9fb856d"
+python-versions = "3.10.*"
+content-hash = "fa9cd61906faa7785180a1a96f25160b753860d432e5ca65888ecaa8d4a2fd2a"
