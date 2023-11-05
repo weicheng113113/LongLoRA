@@ -1,11 +1,10 @@
 import os
 
-import torch
 from datasets import load_dataset
 from fine_tune import tokenize_fn, DEFAULT_PAD_TOKEN, DEFAULT_BOS_TOKEN, DEFAULT_EOS_TOKEN, DEFAULT_UNK_TOKEN
 import transformers
 from functools import partial
-import multiprocess.context as ctx
+import multiprocessing
 
 
 def prepare(model_name_or_path: str, cache_dir: str, model_max_length: int, num_proc: int):
@@ -26,7 +25,7 @@ def prepare(model_name_or_path: str, cache_dir: str, model_max_length: int, num_
         special_tokens_dict["bos_token"] = DEFAULT_BOS_TOKEN
     if tokenizer.unk_token is None:
         special_tokens_dict["unk_token"] = DEFAULT_UNK_TOKEN
-
+    tokenizer.add_special_tokens(special_tokens_dict)
 
     dataset = load_dataset("togethercomputer/RedPajama-Data-1T-Sample", cache_dir=cache_dir)
     dataset = dataset.map(
@@ -50,6 +49,8 @@ def main():
 
 if __name__ == "__main__":
     os.environ["CUDA_VISIBLE_DEVICES"] = ""  # disable GPU
-    ctx._force_start_method('spawn')
+    # multiprocess.set_start_method("spawn", force=True)
+    # ctx._force_start_method('spawn')
     # torch.set_num_threads(1)
+    multiprocessing.set_start_method('spawn')
     main()
