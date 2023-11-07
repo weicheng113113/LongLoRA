@@ -1,14 +1,15 @@
 import os
 
-import torch
+# import torch
 from datasets import load_dataset
 from fine_tune import tokenize_fn, DEFAULT_PAD_TOKEN, DEFAULT_BOS_TOKEN, DEFAULT_EOS_TOKEN, DEFAULT_UNK_TOKEN
 import transformers
 from functools import partial
-import multiprocess.context as ctx
+import huggingface_hub
+# import multiprocess.context as ctx
 
 
-def prepare(model_name_or_path: str, cache_dir: str, model_max_length: int, num_proc: int):
+def create_tokenizer(model_name_or_path: str, cache_dir: str, model_max_length: int):
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         model_name_or_path,
         cache_dir=cache_dir,
@@ -32,8 +33,7 @@ def prepare(model_name_or_path: str, cache_dir: str, model_max_length: int, num_
     return tokenizer
 
 
-def tokenize_fn(example):
-    tokenizer = create_tokenizer()
+def tokenize_fn(example, tokenizer):
     context_length = tokenizer.model_max_length
     outputs = tokenizer(
         tokenizer.eos_token.join(example["text"]),
@@ -46,11 +46,14 @@ def tokenize_fn(example):
 
 
 def prepare(model_name_or_path: str, cache_dir: str, model_max_length: int, num_proc: int):
-    create_tokenizer()  # load llama2
+    tokenizer = create_tokenizer(
+        model_name_or_path=model_name_or_path,
+        cache_dir=cache_dir,
+        model_max_length=model_max_length)
     dataset = load_dataset("togethercomputer/RedPajama-Data-1T-Sample", cache_dir=cache_dir)
 
     dataset = dataset.shuffle().map(
-        partial(tokenize_fn),
+        partial(tokenize_fn, tokenizer),
         batched=True,
         batch_size=500,
         num_proc=num_proc,
