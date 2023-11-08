@@ -31,6 +31,8 @@ from gptneox_attn_replace import replace_gpt_neox_attn
 from peft import LoraConfig, get_peft_model
 from torch.distributed import barrier
 
+from supervised_dataset_v2 import SupervisedDatasetV2
+
 IGNORE_INDEX = -100
 DEFAULT_PAD_TOKEN = "[PAD]"
 DEFAULT_EOS_TOKEN = "</s>"
@@ -230,6 +232,13 @@ def make_supervised_data_module(tokenizer: transformers.PreTrainedTokenizer, dat
     return dict(train_dataset=train_dataset, eval_dataset=None, data_collator=data_collator)
 
 
+def make_supervised_data_module2(tokenizer: transformers.PreTrainedTokenizer, data_args) -> Dict:
+    """Make dataset and collator for supervised fine-tuning."""
+    train_dataset = SupervisedDatasetV2(data_dir=data_args.data_path, tokenizer=tokenizer)
+    data_collator = DataCollatorForSupervisedDataset(tokenizer=tokenizer)
+    return dict(train_dataset=train_dataset, eval_dataset=None, data_collator=data_collator)
+
+
 def train(args: list[str] = None):
     parser = transformers.HfArgumentParser((ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses(args)
@@ -289,7 +298,8 @@ def train(args: list[str] = None):
         model=model,
     )
 
-    data_module = make_supervised_data_module(tokenizer=tokenizer, data_args=data_args)
+    data_module = make_supervised_data_module2(tokenizer=tokenizer, data_args=data_args)
+    # data_module = make_supervised_data_module(tokenizer=tokenizer, data_args=data_args)
 
     if training_args.low_rank_training:
         if model_args.model_type == "gpt-neox":
@@ -314,6 +324,7 @@ def train(args: list[str] = None):
     model.enable_input_require_grads()     # required for gradient checkpointing
     model.gradient_checkpointing_enable()  # enable gradient checkpointing
 
+    print(f"dataloader_num_workers: {training_args.dataloader_num_workers}")
     trainer = Trainer(model=model, tokenizer=tokenizer, args=training_args, **data_module)
     trainer.train()
     trainer.save_state()

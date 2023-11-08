@@ -1,0 +1,32 @@
+Login successful
+Loading checkpoint shards: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 2/2 [00:01<00:00,  1.47it/s]
+Using pad_token, but it is not set yet.
+You are resizing the embedding layer without providing a `pad_to_multiple_of` parameter. This means that the new embedding dimension will be 32001. This might induce some performance reduction as *Tensor Cores* will not be available. For more details about this, or help on choosing the correct value for resizing, refer to this guide: https://docs.nvidia.com/deeplearning/performance/dl-performance-matrix-multiplication/index.html#requirements-tc
+WARNING:root:Loading data...
+WARNING:root:Formatting inputs...
+WARNING:root:Tokenizing inputs... This may take some time...
+dataloader_num_workers: 0
+[2023-11-05 13:35:57,460] [INFO] [real_accelerator.py:158:get_accelerator] Setting ds_accelerator to cuda (auto detect)
+{'loss': 9.7187, 'learning_rate': 1.0000000000000002e-06, 'epoch': 0.0}
+{'loss': 5.9169, 'learning_rate': 2.0000000000000003e-06, 'epoch': 0.0}
+{'loss': 22.3589, 'learning_rate': 3e-06, 'epoch': 0.0}
+{'loss': 69.9404, 'learning_rate': 4.000000000000001e-06, 'epoch': 0.0}
+{'loss': 5.0702, 'learning_rate': 5e-06, 'epoch': 0.0}
+{'loss': 7.6592, 'learning_rate': 6e-06, 'epoch': 0.0}
+{'loss': 4.2299, 'learning_rate': 7e-06, 'epoch': 0.0}
+{'loss': 35.0829, 'learning_rate': 8.000000000000001e-06, 'epoch': 0.01}
+{'loss': 13.9597, 'learning_rate': 9e-06, 'epoch': 0.01}
+{'loss': 27.4353, 'learning_rate': 1e-05, 'epoch': 0.01}
+{'loss': 2.7446, 'learning_rate': 1.1000000000000001e-05, 'epoch': 0.01}
+{'loss': 14.8514, 'learning_rate': 1.2e-05, 'epoch': 0.01}
+{'loss': 6.7409, 'learning_rate': 1.3000000000000001e-05, 'epoch': 0.01}
+{'loss': 1.3518, 'learning_rate': 1.4e-05, 'epoch': 0.01}
+{'loss': 6.4108, 'learning_rate': 1.5000000000000002e-05, 'epoch': 0.01}
+{'loss': 11.7515, 'learning_rate': 1.6000000000000003e-05, 'epoch': 0.01}
+{'loss': 7.6069, 'learning_rate': 1.7e-05, 'epoch': 0.01}
+{'loss': 2.6956, 'learning_rate': 1.8e-05, 'epoch': 0.01}
+{'loss': 43.9986, 'learning_rate': 1.9e-05, 'epoch': 0.01}
+{'loss': 17.0483, 'learning_rate': 2e-05, 'epoch': 0.01}
+{'loss': 5.7689, 'learning_rate': 2e-05, 'epoch': 0.01}
+  0%|▋                                                                                                                                                           | 21/4500 [16:47<52:18:22, 42.04s/it]
+

@@ -8,11 +8,10 @@ def main():
     args.extend([
         "--model_name_or_path", "meta-llama/Llama-2-7b-chat-hf",
         "--output_dir", "./output/7b_supervised_32k",
-        "--cache_dir", "./data/.cache/",
+        # "--cache_dir", "./data/.cache/",
         # "--model_max_length", "32768",
         "--model_max_length", "8192",
         "--use_flash_attn", "True",
-        "--data_path", "LongAlpaca-12k.json",
         "--low_rank_training", "True",
         "--num_train_epochs", "3",
         "--per_device_train_batch_size", "1",
@@ -28,10 +27,23 @@ def main():
         "--lr_scheduler_type", "constant_with_warmup",
         "--logging_steps", "1",
         "--deepspeed", "ds_configs/stage2.json",
-        #
         "--model_type", "llama2",
+        #
+        # dataset v2
+        "--model_max_length", "8192",
+        "--gradient_accumulation_steps", "8",
         "--tf32", "True",
         "--bf16", "True",
+        "--data_path", "./data/",
+        # "--dataloader_num_workers", f"{int(os.cpu_count()//2)}",
+        "--dataloader_num_workers", f"{int(os.cpu_count()//3)}",
+        # "--dataloader_num_workers", "0",
+        #
+        # dataset v1
+        # "--model_max_length", "8192",
+        # "--gradient_accumulation_steps", "8",
+        # "--data_path", "LongAlpaca-12k.json",
+        # "--dataloader_num_workers", "0"
     ])
     huggingface_hub.login("xx")
     train(args)

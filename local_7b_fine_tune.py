@@ -39,7 +39,7 @@ def main():
         "--use_flash_attn", "False"
         # "--use_flash_attn", "True"
     ])
-    huggingface_hub.login("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")
+    huggingface_hub.login("xx")
     train(args)
 
 

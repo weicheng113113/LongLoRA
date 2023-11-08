@@ -8,7 +8,7 @@ pyenv install 3.11.6
 
 ### manage multiple pythons
 
-pyenv shell 3.10.10
+pyenv shell 3.10.13
 pyenv shell 3.11.6
 
 pyenv versions
@@ -40,6 +40,7 @@ poetry lock --no-update
 poetry install --sync
 poetry env use 3.11.6
 poetry env use 3.10.8
+poetry run jupyter notebook
 
 
 ### CUDA
@@ -79,6 +80,9 @@ No module named '_sqlite3'
 No module named '_lzma'
 
 apt-get install libncurses-dev libbz2-dev libffi-dev libreadline-dev libsqlite3-dev liblzma-dev
+
+virtual memory
+https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04
 
 ### training
 torchrun --nproc_per_node=auto sagemaker_7b_supervised_fine_tune.py
