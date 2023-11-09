@@ -61,6 +61,9 @@ apt update
 apt install tmux
 tmux
 
+tmux history:
+ctrl+b [; then up
+
 exec bash - switch to bash
 exec zsh - Switch to zsh
 

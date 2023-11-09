@@ -20,13 +20,16 @@ from functools import partial
 from typing import Dict, Optional, Sequence
 
 import torch
+import torch.nn as nn
 import transformers
 from torch.utils.data import Dataset
-from transformers import Trainer, DataCollatorForLanguageModeling
 from llama_attn_replace import replace_llama_attn
 from gptneox_attn_replace import replace_gpt_neox_attn
 from peft import LoraConfig, get_peft_model
 from torch.distributed import barrier
+from transformers import Trainer, DataCollatorForLanguageModeling, BitsAndBytesConfig
+from peft.tuners.lora import LoraLayer
+from datasets import load_from_disk
 
 
 from datasets import load_dataset
@@ -37,6 +40,19 @@ DEFAULT_EOS_TOKEN = "</s>"
 DEFAULT_BOS_TOKEN = "<s>"
 DEFAULT_UNK_TOKEN = "<unk>"
 
+def upcast_layer_for_flash_attention(model, torch_dtype):
+    # LlamaRMSNorm layers are in fp32 after kbit_training, so we need to
+    # convert them back to fp16/bf16 for flash-attn compatibility.
+    for name, module in model.named_modules():
+        if isinstance(module, LoraLayer):
+            module.to(torch_dtype)
+        if "norm" in name:
+            module.to(torch_dtype)
+        if "lm_head" in name or "embed_tokens" in name:
+            if hasattr(module, "weight"):
+                module.to(torch_dtype)
+
+    return model
 
 @dataclass
 class ModelArguments:
@@ -45,6 +61,10 @@ class ModelArguments:
 
 @dataclass
 class TrainingArguments(transformers.TrainingArguments):
+    data_dir: str = field(
+        default="./data",
+        metadata={"help": "data directory"},
+    )
     cache_dir: Optional[str] = field(default="data/.cache")
     optim: str = field(default="adamw_torch")
     model_max_length: int = field(
@@ -141,6 +161,14 @@ def train(args: list[str] = None):
         config=config,
         cache_dir=training_args.cache_dir,
         torch_dtype=torch.bfloat16,
+        quantization_config=BitsAndBytesConfig(
+            load_in_4bit=True,
+            llm_int8_threshold=6.0,
+            llm_int8_has_fp16_weight=False,
+            bnb_4bit_compute_dtype=torch.bfloat16,
+            bnb_4bit_use_double_quant=True,
+            bnb_4bit_quant_type="nf4",
+        ),
     )
 
     tokenizer = transformers.AutoTokenizer.from_pretrained(
@@ -170,12 +198,14 @@ def train(args: list[str] = None):
     rank = int(os.environ.get('RANK', -1))
     if rank > 0:
         barrier()
-    dataset = load_dataset("togethercomputer/RedPajama-Data-1T-Sample", cache_dir=training_args.cache_dir)
-    dataset = dataset.shuffle().map(
-        partial(tokenize_fn, tokenizer),
-        batched=True,
-        num_proc=training_args.dataset_num_workers,
-        remove_columns=["text", "meta"])
+    # dataset = load_dataset("togethercomputer/RedPajama-Data-1T-Sample", cache_dir=training_args.cache_dir)
+    # dataset = dataset.shuffle().map(
+    #     partial(tokenize_fn, tokenizer),
+    #     batched=True,
+    #     num_proc=training_args.dataset_num_workers,
+    #     remove_columns=["text", "meta"])
+    dataset = load_from_disk(training_args.data_dir)
+
     # dataset = dataset.map(partial(tokenize_fn,tokenizer),batched=True, num_proc=128, remove_columns=["text", "meta"])
 
     if rank == 0:
@@ -201,8 +231,28 @@ def train(args: list[str] = None):
             task_type="CAUSAL_LM",
         )
         model = get_peft_model(model, config)
+        model = upcast_layer_for_flash_attention(model, torch.bfloat16)
         # enable trainable params
         [p.requires_grad_() for n, p in model.named_parameters() if any([k in n for k in training_args.trainable_params.split(",")])]
+
+    class CastOutputToFloat(nn.Sequential):
+        def forward(self, x):
+            return super().forward(x).to(torch.float32)
+
+    model.lm_head = CastOutputToFloat(model.lm_head)
+
+    # Verifying the datatypes.
+    dtypes = {}
+    for _, p in model.named_parameters():
+        dtype = p.dtype
+        if dtype not in dtypes:
+            dtypes[dtype] = 0
+        dtypes[dtype] += p.numel()
+    total = 0
+    for k, v in dtypes.items():
+        total += v
+    for k, v in dtypes.items():
+        print(k, v, v / total)
 
     model.config.use_cache = False         # required for gradient checkpointing
     model.enable_input_require_grads()     # required for gradient checkpointing

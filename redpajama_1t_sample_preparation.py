@@ -33,7 +33,7 @@ def create_tokenizer(model_name_or_path: str, cache_dir: str, model_max_length: 
     return tokenizer
 
 
-def tokenize_fn(example, tokenizer):
+def tokenize_fn(tokenizer, example):
     context_length = tokenizer.model_max_length
     outputs = tokenizer(
         tokenizer.eos_token.join(example["text"]),
@@ -55,18 +55,17 @@ def prepare(model_name_or_path: str, cache_dir: str, model_max_length: int, num_
     dataset = dataset.shuffle().map(
         partial(tokenize_fn, tokenizer),
         batched=True,
-        batch_size=500,
+        batch_size=1000,
         num_proc=num_proc,
-        writer_batch_size=500,
+        writer_batch_size=1000,
         remove_columns=["text", "meta"])
 
     print(dataset)
+    dataset.save_to_disk("./data/redpajama_1t_sample")
 
 
 def main():
     num_proc = int(os.cpu_count()//2)
-    if num_proc > 10:
-        num_proc = 10
     prepare(
         model_name_or_path="meta-llama/Llama-2-7b-hf",
         cache_dir="./data/.cache",
