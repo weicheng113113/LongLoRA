@@ -12,7 +12,7 @@ def main():
         # "--model_name_or_path", "/media/cwei/WD_BLACK/model_weights/llama2/llama-2-7b/",
         # "--cache_dir", "path_to_cache/",
         "--model_name_or_path", "meta-llama/Llama-2-7b-hf",
-        "--output_dir", "./output/7b_qlora_8k",
+        "--output_dir", "./output/7b_qlora_8k_01",
         "--cache_dir", "./data/.cache/",
         "--model_max_length", "8192",
         "--use_flash_attn", "True",

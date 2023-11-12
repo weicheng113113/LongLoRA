@@ -88,6 +88,7 @@ virtual memory
 https://www.digitalocean.com/community/tutorials/how-to-add-swap-space-on-ubuntu-20-04
 
 ### training
+torchrun --nproc_per_node=auto sagemaker_7b_fine_tune_qlora.py
 torchrun --nproc_per_node=auto sagemaker_7b_supervised_fine_tune.py
 torchrun --nproc_per_node=auto sagemaker_7b_fine_tune.py
 torchrun --nproc_per_node=auto sagemaker_7b_supervised_fine_tune_qlora.py

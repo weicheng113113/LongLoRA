@@ -16,11 +16,11 @@ import os
 import torch
 import argparse
 
-def parse_config():
+def parse_config(cmd_args: list[str] = None):
     parser = argparse.ArgumentParser(description='arg parser')
     parser.add_argument('--checkpoint_path', type=str, default="/dataset/models/checkpoint-1000")
     parser.add_argument('--trainable_params', type=str, default="embed,norm")
-    args = parser.parse_args()
+    args = parser.parse_args(cmd_args)
     return args
 
 
@@ -47,5 +47,9 @@ def main(args):
     torch.save(weights_trainable, trainable_params)
 
 if __name__ == "__main__":
-    args = parse_config()
+    cmd_args = []
+    cmd_args.extend([
+        "--checkpoint_path", "./output/7b_qlora_8k/checkpoint-1000",
+    ])
+    args = parse_config(cmd_args)
     main(args)
