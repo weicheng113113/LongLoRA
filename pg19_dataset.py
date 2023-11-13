@@ -15,17 +15,18 @@ class Pg19Dataset(Dataset):
 
     def __len__(self):
         # return len(self.start_indices)
-        return 8
+        return 100
 
     def __getitem__(self, index) -> dict[str, torch.Tensor]:
         start = self.start_indices[index]
         end = start + self.seq_length
 
         input_id = torch.from_numpy(self.data[start: end].astype(np.int64))
-        label = torch.from_numpy(self.data[start+1: end+1].astype(np.int64))
+        y = torch.from_numpy(self.data[start+1: end+1].astype(np.int64))
         return {
             "input_ids": input_id,
-            "labels": label
+            "labels": input_id,
+            "ys": y
         }
 
     def num_tokens(self):

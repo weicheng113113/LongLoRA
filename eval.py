@@ -41,6 +41,7 @@ def parse_config(cmd_args: list[str] = None):
 def get_as_batch(data, seq_length, batch_size, device='cpu', sliding_window=256):
     all_ix = list(range(0, len(data) - seq_length, sliding_window))
     all_ix.pop()
+    all_ix = all_ix[:100]
 
     for idx in range(0, len(all_ix), batch_size):
         ix = all_ix[idx:idx+batch_size]
