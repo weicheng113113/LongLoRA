@@ -1,18 +1,20 @@
-from eval_distributed_qlora import main
+from eval_distributed import main
 import huggingface_hub
 
 
 def run_eval():
     args = []
     args.extend([
-        "--eval_accumulation_steps", "1",
-        "--output_dir", "./output/tmp",
+        # "--output_dir", "./output/tmp",
         "--seq_len", "8192",
         "--context_size", "8192",
-        "--per_device_eval_batch_size", "1",
+        "--batch_size", "1",
         "--base_model", "meta-llama/Llama-2-7b-hf",
         # "--peft_model", "./output/7b_qlora_8k/checkpoint-1000/",
-        # {'eval_loss': 11.007083892822266, 'eval_accuracy': 0.5008697509765625, 'eval_perplexity': 60299.7890625, 'eval_runtime': 29.6625, 'eval_samples_per_second': 0.27, 'eval_steps_per_second': 0.27}
+        # 8
+        # {'eval_loss': 2.3629369735717773, 'eval_accuracy': 0.5023654010499329, 'eval_perplexity': 10.622102737426758, 'eval_runtime': 31.6654, 'eval_samples_per_second': 0.253, 'eval_steps_per_second': 0.253}
+        # 30; used 02:45
+        # {'eval_loss': 2.323765277862549, 'eval_accuracy': 0.5105522321246897, 'eval_perplexity': 10.21406078338623, 'eval_runtime': 171.192, 'eval_samples_per_second': 0.175, 'eval_steps_per_second': 0.175}
 
         "--peft_model", "/home/ubuntu/models/Llama-2-7b-longlora-8k",
         # 8
@@ -24,10 +26,13 @@ def run_eval():
         "--data_path", "./datasets/pg19/test.bin",
         "--cache_dir", "./data/.cache",
         "--flash_attn", "True",
+        "--progress_bar_fresh_rate", "10",
     ])
     huggingface_hub.login("xx")
 
     main(args)
+    # world_size = torch.cuda.device_count()
+    # mp.spawn(main, args=(world_size, args), nprocs=world_size)
 
 
 if __name__ == "__main__":
